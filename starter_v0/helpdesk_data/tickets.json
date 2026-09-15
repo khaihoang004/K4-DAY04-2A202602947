@@ -60,6 +60,18 @@
       "created_at": "2026-09-14T07:45:00+07:00",
       "updated_at": "2026-09-14T08:50:00+07:00",
       "notes": "Technician on site inspecting roller assembly."
+    },
+    {
+      "ticket_id": "INC-1002",
+      "summary": "Floor 2 meeting room projector PJ-203 display signal failure",
+      "priority": "high",
+      "status": "in_progress",
+      "asset_id": "PJ-203",
+      "requester_id": "EMP-1007",
+      "assignee_id": "EMP-1012",
+      "created_at": "2026-09-15T09:10:00+07:00",
+      "updated_at": "2026-09-15T10:25:00+07:00",
+      "notes": "Technician on site checking HDMI connection and projector input settings."
     }
   ]
 }
