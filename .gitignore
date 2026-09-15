@@ -27,3 +27,4 @@ starter_v0/tests/
 Thumbs.db
 .idea/
 .vscode/
+.chainlit
