@@ -2,7 +2,7 @@
 
 ## Team
 
-- Team: Chưa biết
+- Team: 2A202602947 (MSSV của nhóm trưởng)
 - Members:
   - Hoàng Trung Khải - 2A202602947
   - Nguyễn Minh Dương - 2A202602920
@@ -19,8 +19,10 @@
 
 Run in command
 ```
-chainlit run starter_v0\app.py
+cd starter_v0
+chainlit run app.py -w
 ```
+Giao diện sẽ tạm thời chạy ở `http://localhost:8000/`
 
 ## A2. Tool agent có
 
@@ -193,13 +195,6 @@ evidence thực tế trong repository, không chỉ mô tả cảm nhận chung.
 
 ## C2. Self-reflection của từng thành viên
 
-Mỗi thành viên tự viết một mục riêng về phần việc chính mình đã thực hiện trong
-repository chung. Không viết thay hoặc gộp nhiều thành viên vào một câu trả lời.
-Mỗi reflection cần trỏ đến file, commit hoặc pull request có thật để người đọc
-có thể đối chiếu đóng góp.
-
-Sao chép mẫu dưới đây cho từng thành viên:
-
 ### Họ tên — MSSV
 ### Nguyễn Thu Trang — 2A202602435
 
@@ -229,10 +224,22 @@ Sao chép mẫu dưới đây cho từng thành viên:
 - **Điều tôi học được từ phần việc này:** Cách tích hợp tools mới vào pipeline và test suite một cách liền mạch, đồng thời duy trì tính an toàn và độ chính xác.
 - **Nếu làm lại, tôi sẽ cải thiện điều gì:** Thêm các test case đa dạng hơn cho các trường hợp lỗi nhập sai và kiểm tra guardrail tự động.
 
+### Hoàng Trung Khải — 2A202602947
 
-Mỗi thành viên phải tự commit phần self-reflection của mình bằng Git identity
-tương ứng. Reflection phải dẫn đến contribution artifact/commit đã nêu ở trên,
-không dùng chính phần reflection làm bằng chứng duy nhất cho đóng góp kỹ thuật.
+- **Vai trò/phần việc được nhận:** Xây dựng giao diện Chainlit cho agent (`app.py`) — Chat mode để hội thoại tự do, Test mode để chạy sẵn các test case trong `data/eval_*.json`, và tách riêng phần hội thoại chính khỏi phần debug/tool-calling evidence để vừa demo được vừa phục vụ đánh giá.
+- **Những gì tôi đã thay đổi trong repo chung:**
+  - Thêm cơ chế chuyển **Chat mode ↔ Test mode**: ở Test mode, hệ thống tự quét `data/eval_*.json`, hiển thị action button cho từng file rồi từng test case để chọn và chạy, không cần gõ tay câu hỏi.
+  - Tách toàn bộ tool calls/arguments/tool results vào một khối **Debug trace** (`cl.Step` lồng nhau, có thể mở/thu gọn) riêng biệt với khung hội thoại chính (`render_debug_trace` / `render_final_answer` trong `app.py`), giúp người xem demo không bị "ngợp" JSON.
+  - Viết `run_case()` để xử lý đúng cả case **single-turn** và **multi-turn**: với multi-turn, mỗi turn được gửi nối tiếp vào một `local_history` riêng cho từng case (mô phỏng hội thoại thật), tránh lẫn với lịch sử Chat mode hoặc case khác.
+  - Viết logic so khớp `expect.tool_calls` theo kiểu **"chứa"** (`check_expected_tool_calls`, `args_contains`) thay vì so khớp tuyệt đối theo thứ tự/số lượng — vì ở case multi-turn agent có thể gọi thêm tool phụ ở các turn đầu (khi user chưa cung cấp đủ thông tin) mà vẫn được tính PASS nếu tool call kỳ vọng cuối cùng xuất hiện đúng.
+  - Thêm chức năng **Run tất cả** một file eval, tự tổng hợp Passed/Failed/Không-có-expected.
+- **File hoặc artifact liên quan:** [app.py](app.py), [data/eval_bonus.json](data/eval_bonus.json), [starter_v0/helpdesk_data/tickets.json](starter_v0/helpdesk_data/tickets.json)
+- **Commit hash hoặc pull request:** `ee69042`, `329414f`
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Tôi lựa chọn xây dựng UI trên Chainlit vì framework này phù hợp với agent dạng hội thoại và cho phép tích hợp nhanh giữa chat interface, model response và tool execution. Tôi cũng tách Chat mode và Test mode để cùng một giao diện có thể phục vụ hai mục đích: demo agent cho người dùng và kiểm thử behavior một cách có hệ thống. Khi test dùng action button gắn trực tiếp vào message — vừa đủ tiện để chọn file/case bằng một click, vừa chắc chắn tương thích, giúp quá trình thử dễ dàng hơn.
+
+- **Khó khăn tôi gặp và cách tôi xử lý:** Khó khăn chính là đồng bộ trạng thái giữa giao diện và agent loop, đặc biệt khi một request có thể phát sinh nhiều lần model call và tool call. Ngoài ra còn có xác định cách so khớp kết quả cho case multi-turn (`B04_multiturn_ticket_tracking`) — nếu so khớp tuyệt đối cả list tool_calls thì sai ngay từ các turn đầu chưa cần gọi tool. Tôi xử lý bằng cách gộp toàn bộ tool_calls của mọi turn trong 1 case lại rồi chỉ kiểm tra "có chứa" tool call kỳ vọng hay không, không quan tâm thứ tự hay các tool gọi thêm.
+- **Điều tôi học được từ phần việc này:** Tôi học được cách tích hợp một Agent backend với giao diện hội thoại thực tế, đồng thời hiểu rõ hơn cách quản lý state, asynchronous execution và hiển thị tool trace trong Chainlit. Việc xây dựng Test mode cũng giúp tôi hiểu rằng UI có thể đóng vai trò như một lớp hỗ trợ trực tiếp cho quá trình evaluation và debugging Agent.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Tôi sẽ tiếp tục cải thiện UI theo hướng trực quan hơn, đặc biệt là cách hiển thị tool trace và kết quả evaluation. Thêm màn hình tổng hợp lịch sử các lần chạy test (không chỉ hiện kết quả tức thời), giúp người dùng có thể xem nhanh số case PASS/FAIL và so sánh kết quả giữa các version của Agent ngay trên giao diện. Và có thể quay lại thử hướng sidebar dropdown nếu có thêm thời gian kiểm thử tương thích kỹ hơn. 
 
 ## C3. Final checkout
 
